@@ -1,2 +1,3 @@
 # Et_incarnatus_est
-TODO mk readme sketch..
+Melodias SATB para "Et incarnatus est" de Palestrina.
+
