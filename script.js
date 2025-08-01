@@ -1,6 +1,6 @@
 let audioCtx;
 
-function play(delay, midiNumber, duration) {
+function play(delay, midiNumber, duration, letra) {
 
     const startTime = audioCtx.currentTime + delay
     const endTime = startTime + duration
@@ -27,7 +27,10 @@ function play(delay, midiNumber, duration) {
   
     oscillator.start(startTime);
     oscillator.stop(endTime);
-//    document.getElementById("lyrics").textContent = letra;
+    
+    setTimeout(() => {
+        document.getElementById("lyrics").textContent = letra;
+    }, delay * 1000);
 }
 
 const soprano = [
@@ -88,7 +91,7 @@ const soprano = [
 function playSoprano() {
     let delay = 0.1;
     soprano.map(note => {
-      play(delay, note.nMidi, note.duracao / 6);
+      play(delay, note.nMidi, note.duracao / 6, note.letra);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
@@ -133,7 +136,7 @@ const alto = [
 function playAlto() {
     let delay = 0.1;
     alto.map(note => {
-      play(delay, note.nMidi, note.duracao / 6);
+      play(delay, note.nMidi, note.duracao / 6, note.letra);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
@@ -181,7 +184,7 @@ const tenor = [
 function playTenor() {
     let delay = 0.1;
     tenor.map(note => {
-      play(delay, note.nMidi, note.duracao / 6);
+      play(delay, note.nMidi, note.duracao / 6, note.letra);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
@@ -223,7 +226,7 @@ const baixo = [
 function playBaixo() {
     let delay = 0.1;
     baixo.map(note => {
-      play(delay, note.nMidi, note.duracao / 6);
+      play(delay, note.nMidi, note.duracao / 6, note.letra);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
