@@ -35,6 +35,18 @@
         min-height: 30px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       }
+      #diagram-container {
+        margin-top: 20px;
+        text-align: center;
+        background-color: white;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      #chromatic-spiral {
+        border: 1px solid #ddd;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -48,6 +60,11 @@
     <br>
     <button id="play-todos">Todos</button><br>
     <div id="lyrics"></div>
+    <div id="diagram-container">
+      <h3>Chromatic Spiral</h3>
+      <svg id="chromatic-spiral" width="450" height="450" viewBox="0 0 450 450">
+      </svg>
+    </div>
   </body>
 </html>
 

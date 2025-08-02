@@ -1,4 +1,124 @@
 let audioCtx;
+let currentNoteMarker = null;
+
+const chromaticNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function initializeSpiralDiagram() {
+    const svg = document.getElementById('chromatic-spiral');
+    const centerX = 225;
+    const centerY = 225;
+    const baseRadius = 150;
+    const spiralSpacing = 25;
+    
+    // Clear existing content
+    svg.innerHTML = '';
+    
+    // Draw chromatic note labels outside the circle
+    chromaticNotes.forEach((note, index) => {
+        const angle = (index * 30 - 90) * Math.PI / 180; // Start at top (12 o'clock)
+        const labelRadius = baseRadius + 65; // Moved further out
+        const x = centerX + Math.cos(angle) * labelRadius;
+        const y = centerY + Math.sin(angle) * labelRadius;
+        
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', x);
+        label.setAttribute('y', y);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('dominant-baseline', 'middle');
+        label.setAttribute('fill', '#333');
+        label.setAttribute('font-size', '16');
+        label.setAttribute('font-weight', 'bold');
+        label.textContent = note;
+        svg.appendChild(label);
+    });
+    
+    // Draw spiral path for reference (light gray)
+    const spiralPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    let pathData = '';
+    
+    for (let midi = 36; midi <= 84; midi++) {
+        const pos = getMidiPosition(midi, centerX, centerY, baseRadius, spiralSpacing);
+        if (midi === 36) {
+            pathData += `M ${pos.x} ${pos.y}`;
+        } else {
+            pathData += ` L ${pos.x} ${pos.y}`;
+        }
+    }
+    
+    spiralPath.setAttribute('d', pathData);
+    spiralPath.setAttribute('fill', 'none');
+    spiralPath.setAttribute('stroke', '#eee');
+    spiralPath.setAttribute('stroke-width', '2');
+    svg.appendChild(spiralPath);
+    
+    // Draw note positions
+    for (let midi = 36; midi <= 84; midi++) {
+        const pos = getMidiPosition(midi, centerX, centerY, baseRadius, spiralSpacing);
+        
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos.x);
+        circle.setAttribute('cy', pos.y);
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', '#666');
+        circle.setAttribute('stroke', '#333');
+        circle.setAttribute('stroke-width', '1');
+        circle.setAttribute('data-midi', midi);
+        circle.setAttribute('class', 'note-dot');
+        svg.appendChild(circle);
+    }
+}
+
+function getMidiPosition(midiNote, centerX, centerY, baseRadius, spiralSpacing) {
+    const chromaticPosition = midiNote % 12;
+    const octave = Math.floor((midiNote - 60) / 12);
+    
+    // Angle: 0 degrees at top (C), clockwise
+    const angle = (chromaticPosition * 30 - 90) * Math.PI / 180;
+    
+    // Radius: smaller for higher octaves, larger for lower octaves
+    const radius = baseRadius - (octave * spiralSpacing);
+    
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    
+    return { x, y };
+}
+
+
+function highlightNote(midiNote) {
+    // Remove previous highlight
+    if (currentNoteMarker) {
+        currentNoteMarker.remove();
+    }
+    
+    if (midiNote === 0) return; // Skip rest notes
+    
+    const svg = document.getElementById('chromatic-spiral');
+    const centerX = 225;
+    const centerY = 225;
+    const baseRadius = 150;
+    const spiralSpacing = 25;
+    
+    const pos = getMidiPosition(midiNote, centerX, centerY, baseRadius, spiralSpacing);
+    
+    // Create highlight circle
+    const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    highlight.setAttribute('cx', pos.x);
+    highlight.setAttribute('cy', pos.y);
+    highlight.setAttribute('r', '8');
+    highlight.setAttribute('fill', 'none');
+    highlight.setAttribute('stroke', '#ff4444');
+    highlight.setAttribute('stroke-width', '3');
+    highlight.setAttribute('class', 'current-note-highlight');
+    
+    svg.appendChild(highlight);
+    currentNoteMarker = highlight;
+}
+
+// Initialize diagram when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    initializeSpiralDiagram();
+});
 
 function play(delay, midiNumber, duration, letra) {
 
@@ -30,6 +150,7 @@ function play(delay, midiNumber, duration, letra) {
     
     setTimeout(() => {
         document.getElementById("lyrics").textContent = letra;
+        highlightNote(midiNumber);
     }, delay * 1000);
 }
 
