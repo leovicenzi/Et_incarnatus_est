@@ -305,6 +305,7 @@ function playAlto() {
     let delay = 0.1;
     alto.map(note => {
       play(delay, note.nMidi, note.duracao / 6, note.letra);
+      setTimeout(() => updateLyrics(note.letra), delay * 1000);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
@@ -353,6 +354,7 @@ function playTenor() {
     let delay = 0.1;
     tenor.map(note => {
       play(delay, note.nMidi, note.duracao / 6, note.letra);
+      setTimeout(() => updateLyrics(note.letra), delay * 1000);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
@@ -395,6 +397,7 @@ function playBaixo() {
     let delay = 0.1;
     baixo.map(note => {
       play(delay, note.nMidi, note.duracao / 6, note.letra);
+      setTimeout(() => updateLyrics(note.letra), delay * 1000);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
