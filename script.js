@@ -1,14 +1,14 @@
 let audioCtx;
-let currentNoteMarker = null;
+let currentNoteMarkers = [];
 
 const chromaticNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 function initializeSpiralDiagram() {
     const svg = document.getElementById('chromatic-spiral');
-    const centerX = 225;
-    const centerY = 225;
-    const baseRadius = 150;
-    const spiralSpacing = 25;
+    const centerX = 300;
+    const centerY = 300;
+    const baseRadius = 120;
+    const spiralSpacing = 35;
     
     // Clear existing content
     svg.innerHTML = '';
@@ -16,7 +16,7 @@ function initializeSpiralDiagram() {
     // Draw chromatic note labels outside the circle
     chromaticNotes.forEach((note, index) => {
         const angle = (index * 30 - 90) * Math.PI / 180; // Start at top (12 o'clock)
-        const labelRadius = baseRadius + 65; // Moved further out
+        const labelRadius = baseRadius + 80; // Adjusted for optimized spiral
         const x = centerX + Math.cos(angle) * labelRadius;
         const y = centerY + Math.sin(angle) * labelRadius;
         
@@ -36,9 +36,9 @@ function initializeSpiralDiagram() {
     const spiralPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let pathData = '';
     
-    for (let midi = 36; midi <= 84; midi++) {
+    for (let midi = 45; midi <= 71; midi++) {
         const pos = getMidiPosition(midi, centerX, centerY, baseRadius, spiralSpacing);
-        if (midi === 36) {
+        if (midi === 45) {
             pathData += `M ${pos.x} ${pos.y}`;
         } else {
             pathData += ` L ${pos.x} ${pos.y}`;
@@ -51,32 +51,57 @@ function initializeSpiralDiagram() {
     spiralPath.setAttribute('stroke-width', '2');
     svg.appendChild(spiralPath);
     
-    // Draw note positions
-    for (let midi = 36; midi <= 84; midi++) {
+    // Add lyrics text in the center
+    const lyricsText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lyricsText.setAttribute('x', centerX);
+    lyricsText.setAttribute('y', centerY);
+    lyricsText.setAttribute('text-anchor', 'middle');
+    lyricsText.setAttribute('dominant-baseline', 'middle');
+    lyricsText.setAttribute('fill', '#333');
+    lyricsText.setAttribute('font-size', '24');
+    lyricsText.setAttribute('font-weight', 'bold');
+    lyricsText.setAttribute('id', 'spiral-lyrics');
+    lyricsText.textContent = '';
+    svg.appendChild(lyricsText);
+    
+    // Draw note positions with MIDI numbers
+    for (let midi = 45; midi <= 71; midi++) {
         const pos = getMidiPosition(midi, centerX, centerY, baseRadius, spiralSpacing);
         
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', pos.x);
         circle.setAttribute('cy', pos.y);
-        circle.setAttribute('r', '4');
-        circle.setAttribute('fill', '#666');
+        circle.setAttribute('r', '12');
+        circle.setAttribute('fill', '#f0f0f0');
         circle.setAttribute('stroke', '#333');
         circle.setAttribute('stroke-width', '1');
         circle.setAttribute('data-midi', midi);
         circle.setAttribute('class', 'note-dot');
         svg.appendChild(circle);
+        
+        // Add MIDI number text inside the circle
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x);
+        text.setAttribute('y', pos.y);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('fill', '#333');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = midi;
+        svg.appendChild(text);
     }
 }
 
 function getMidiPosition(midiNote, centerX, centerY, baseRadius, spiralSpacing) {
     const chromaticPosition = midiNote % 12;
-    const octave = Math.floor((midiNote - 60) / 12);
+    
+    // Calculate radius based on MIDI note directly (not octave from 60)
+    // MIDI 60 (C4) is at base radius, each semitone adds spiralSpacing/12
+    const radius = baseRadius + ((midiNote - 60) * spiralSpacing / 12);
     
     // Angle: 0 degrees at top (C), clockwise
     const angle = (chromaticPosition * 30 - 90) * Math.PI / 180;
-    
-    // Radius: smaller for higher octaves, larger for lower octaves
-    const radius = baseRadius - (octave * spiralSpacing);
     
     const x = centerX + Math.cos(angle) * radius;
     const y = centerY + Math.sin(angle) * radius;
@@ -85,19 +110,14 @@ function getMidiPosition(midiNote, centerX, centerY, baseRadius, spiralSpacing) 
 }
 
 
-function highlightNote(midiNote) {
-    // Remove previous highlight
-    if (currentNoteMarker) {
-        currentNoteMarker.remove();
-    }
-    
+function addNoteHighlight(midiNote) {
     if (midiNote === 0) return; // Skip rest notes
     
     const svg = document.getElementById('chromatic-spiral');
-    const centerX = 225;
-    const centerY = 225;
-    const baseRadius = 150;
-    const spiralSpacing = 25;
+    const centerX = 300;
+    const centerY = 300;
+    const baseRadius = 120;
+    const spiralSpacing = 35;
     
     const pos = getMidiPosition(midiNote, centerX, centerY, baseRadius, spiralSpacing);
     
@@ -110,9 +130,28 @@ function highlightNote(midiNote) {
     highlight.setAttribute('stroke', '#ff4444');
     highlight.setAttribute('stroke-width', '3');
     highlight.setAttribute('class', 'current-note-highlight');
+    highlight.setAttribute('data-midi', midiNote);
     
     svg.appendChild(highlight);
-    currentNoteMarker = highlight;
+    currentNoteMarkers.push(highlight);
+}
+
+function removeNoteHighlight(midiNote) {
+    if (midiNote === 0) return; // Skip rest notes
+    
+    // Find and remove highlight for this specific MIDI note
+    currentNoteMarkers = currentNoteMarkers.filter(marker => {
+        if (marker.getAttribute('data-midi') == midiNote) {
+            marker.remove();
+            return false;
+        }
+        return true;
+    });
+}
+
+function clearAllHighlights() {
+    currentNoteMarkers.forEach(marker => marker.remove());
+    currentNoteMarkers = [];
 }
 
 // Initialize diagram when page loads
@@ -149,9 +188,12 @@ function play(delay, midiNumber, duration, letra) {
     oscillator.stop(endTime);
     
     setTimeout(() => {
-        document.getElementById("lyrics").textContent = letra;
-        highlightNote(midiNumber);
+        addNoteHighlight(midiNumber);
     }, delay * 1000);
+    
+    setTimeout(() => {
+        removeNoteHighlight(midiNumber);
+    }, (delay + duration) * 1000);
 }
 
 const soprano = [
@@ -213,9 +255,14 @@ function playSoprano() {
     let delay = 0.1;
     soprano.map(note => {
       play(delay, note.nMidi, note.duracao / 6, note.letra);
+      setTimeout(() => updateLyrics(note.letra), delay * 1000);
       delay += note.duracao / 6; // assumes that each duration is a multiple of 8th notes
     });
   }
+
+function updateLyrics(letra) {
+    document.getElementById("spiral-lyrics").textContent = letra;
+}
 
 
 const playButtonS = document.getElementById("play-soprano");
@@ -359,6 +406,13 @@ playButtonB.addEventListener("click", () => {
 });
 
 function playTodos() {
+    // For todos, only show soprano lyrics
+    let delay = 0.1;
+    soprano.map(note => {
+      setTimeout(() => updateLyrics(note.letra), delay * 1000);
+      delay += note.duracao / 6;
+    });
+    
     playSoprano ();
     playAlto ();
     playTenor ();

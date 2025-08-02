@@ -24,24 +24,16 @@
       button:hover {
         background-color: #357abd;
       }
-      #lyrics {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: white;
-        border-radius: 5px;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        min-height: 30px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      }
       #diagram-container {
         margin-top: 20px;
         text-align: center;
         background-color: white;
         border-radius: 5px;
-        padding: 20px;
+        padding: 40px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        width: 650px;
+        margin-left: auto;
+        margin-right: auto;
       }
       #chromatic-spiral {
         border: 1px solid #ddd;
@@ -59,10 +51,9 @@
     <button id="play-baixo">Baixo</button><br>
     <br>
     <button id="play-todos">Todos</button><br>
-    <div id="lyrics"></div>
     <div id="diagram-container">
       <h3>Chromatic Spiral</h3>
-      <svg id="chromatic-spiral" width="450" height="450" viewBox="0 0 450 450">
+      <svg id="chromatic-spiral" width="600" height="600" viewBox="0 0 600 600">
       </svg>
     </div>
   </body>
